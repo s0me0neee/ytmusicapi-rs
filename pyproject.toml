@@ -1,0 +1,8 @@
+[project]
+name = "ytmusicapi-rs"
+version = "0.1.0"
+description = "Python environment for ytmusicapi Rust bindings"
+requires-python = ">=3.10"
+dependencies = [
+    "ytmusicapi>=1.8.0",
+]

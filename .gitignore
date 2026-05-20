@@ -1,0 +1,10 @@
+/target/
+.venv/
+uv.lock
+__pycache__/
+*.py[cod]
+client_secret*.json
+oauth.json
+browser.json
+curl.txt
+headers.txt

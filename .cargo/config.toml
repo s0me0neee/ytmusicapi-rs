@@ -1,0 +1,4 @@
+# Points PyO3 at the uv-managed venv so it links against the right Python.
+# Run `uv sync` once before the first `cargo build`.
+[env]
+PYO3_PYTHON = { value = ".venv/bin/python", relative = true }
