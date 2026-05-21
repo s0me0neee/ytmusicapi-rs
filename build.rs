@@ -14,24 +14,33 @@ fn main() {
 
     // Embed the absolute site-packages path so the library can inject it into
     // sys.path at runtime, regardless of where the binary is executed from.
-    let lib_dir = manifest_dir.join(".venv/lib");
-    if let Ok(entries) = std::fs::read_dir(&lib_dir) {
+    let site_packages = find_site_packages(&manifest_dir)
+        .expect("Could not find site-packages in .venv — run `uv sync` and retry.");
+    println!(
+        "cargo:rustc-env=YTMUSICAPI_SITE_PACKAGES={}",
+        site_packages.display()
+    );
+
+    println!("cargo:rerun-if-changed=pyproject.toml");
+    println!("cargo:rerun-if-changed=uv.lock");
+}
+
+fn find_site_packages(manifest_dir: &PathBuf) -> Option<PathBuf> {
+    // Windows: .venv/Lib/site-packages (capital L, no pythonX.Y subdirectory)
+    let win = manifest_dir.join(".venv/Lib/site-packages");
+    if win.exists() {
+        return Some(win);
+    }
+    // Unix: .venv/lib/pythonX.Y/site-packages
+    if let Ok(entries) = std::fs::read_dir(manifest_dir.join(".venv/lib")) {
         for entry in entries.flatten() {
-            let name = entry.file_name();
-            let name_str = name.to_string_lossy();
-            if name_str.starts_with("python") {
-                let site_packages = entry.path().join("site-packages");
-                if site_packages.exists() {
-                    println!(
-                        "cargo:rustc-env=YTMUSICAPI_SITE_PACKAGES={}",
-                        site_packages.display()
-                    );
-                    break;
+            if entry.file_name().to_string_lossy().starts_with("python") {
+                let p = entry.path().join("site-packages");
+                if p.exists() {
+                    return Some(p);
                 }
             }
         }
     }
-
-    println!("cargo:rerun-if-changed=pyproject.toml");
-    println!("cargo:rerun-if-changed=uv.lock");
+    None
 }

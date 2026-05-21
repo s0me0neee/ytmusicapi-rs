@@ -17,7 +17,7 @@ uv sync          # create .venv and install ytmusicapi
 cargo build
 ```
 
-The build script (`build.rs`) runs `uv sync` automatically and embeds the venv path at compile time. The `.cargo/config.toml` points PyO3 at `.venv/bin/python`.
+The build script (`build.rs`) runs `uv sync` automatically and embeds the venv path at compile time. The `.cargo/config.toml` sets `VIRTUAL_ENV` to the local `.venv`; `pyo3-build-config` resolves this to the correct Python executable on each platform (Unix: `.venv/bin/python3`, Windows: `.venv/Scripts/python.exe`).
 
 ## Authentication
 

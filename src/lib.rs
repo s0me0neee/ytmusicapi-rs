@@ -210,7 +210,7 @@ pub(crate) fn with_gil<F, R>(f: F) -> R
 where
     F: for<'py> FnOnce(Python<'py>) -> R,
 {
-    Python::try_attach(f).expect("Python interpreter is not initialized")
+    Python::attach(f)
 }
 
 /// Patch `RefreshingToken.__init__` to silently drop any keyword arguments that

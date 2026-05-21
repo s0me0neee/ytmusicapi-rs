@@ -1,4 +1,6 @@
 # Points PyO3 at the uv-managed venv so it links against the right Python.
+# VIRTUAL_ENV is recognized by pyo3-build-config on all platforms:
+# Unix → .venv/bin/python3, Windows → .venv/Scripts/python.exe
 # Run `uv sync` once before the first `cargo build`.
 [env]
-PYO3_PYTHON = { value = ".venv/bin/python", relative = true }
+VIRTUAL_ENV = { value = ".venv", relative = true }
