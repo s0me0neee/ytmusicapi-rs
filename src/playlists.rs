@@ -4,6 +4,8 @@ use pyo3::types::PyDict;
 use serde_json::Value;
 
 impl YTMusic {
+    /// Fetch a playlist's metadata and tracks.
+    /// `related` includes related playlists; `suggestions_limit` caps suggested tracks.
     pub fn get_playlist(
         &self,
         playlist_id: &str,
@@ -45,6 +47,8 @@ impl YTMusic {
         .map_err(py_err)
     }
 
+    /// Edit playlist metadata or reorder tracks (requires auth).
+    /// `move_item` is `(set_video_id, successor_video_id)` — moves `set_video_id` to after `successor_video_id`.
     pub fn edit_playlist(
         &self,
         playlist_id: &str,
@@ -78,6 +82,7 @@ impl YTMusic {
         .map_err(py_err)
     }
 
+    /// Delete a playlist by its ID (requires auth).
     pub fn delete_playlist(&self, playlist_id: &str) -> Result<Value> {
         Python::with_gil(|py| {
             let result = self.inner.bind(py).call_method1("delete_playlist", (playlist_id,))?;
@@ -86,6 +91,7 @@ impl YTMusic {
         .map_err(py_err)
     }
 
+    /// Add videos to a playlist by video ID or by copying from another playlist (requires auth).
     pub fn add_playlist_items(
         &self,
         playlist_id: &str,

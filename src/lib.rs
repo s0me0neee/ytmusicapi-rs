@@ -1,3 +1,28 @@
+//! Rust bindings for the Python [`ytmusicapi`](https://github.com/sigma67/ytmusicapi) library,
+//! implemented via [PyO3](https://pyo3.rs/).
+//!
+//! All methods return [`Result<serde_json::Value>`]. The conversion goes through Python's
+//! `json.dumps` / `json.loads`, so every returned value is guaranteed to be valid JSON.
+//!
+//! # Quick start
+//!
+//! ```rust,no_run
+//! use ytmusicapi_rs::YTMusic;
+//!
+//! // Unauthenticated — public endpoints only
+//! let yt = YTMusic::new().unwrap();
+//! let results = yt.search("Radiohead", Some("artists"), None, Some(5), None).unwrap();
+//!
+//! // Browser auth — personal library and write operations
+//! let yt = YTMusic::authenticated("browser.json").unwrap();
+//! let songs = yt.get_liked_songs(Some(25)).unwrap();
+//! ```
+//!
+//! # Thread safety
+//!
+//! [`YTMusic`] implements `Send + Sync`. The GIL is acquired explicitly on every call,
+//! so instances can be shared across threads via `Arc<YTMusic>`.
+
 pub mod error;
 mod browse;
 mod explore;
@@ -12,6 +37,7 @@ use pyo3::prelude::*;
 use pyo3::types::PyDict;
 use serde_json::Value;
 
+/// Shorthand `Result` used by all `YTMusic` methods.
 pub type Result<T> = std::result::Result<T, YtMusicError>;
 
 // Embedded at build time by build.rs so we can inject the venv into sys.path

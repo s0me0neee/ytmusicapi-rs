@@ -5,6 +5,7 @@ use pyo3::types::PyDict;
 use serde_json::Value;
 
 impl YTMusic {
+    /// Fetch the user's saved songs (requires auth).
     pub fn get_library_songs(
         &self,
         limit: Option<u32>,
@@ -22,6 +23,7 @@ impl YTMusic {
         .map_err(py_err)
     }
 
+    /// Fetch the user's saved albums (requires auth).
     pub fn get_library_albums(&self, limit: Option<u32>, order: Option<&str>) -> Result<Value> {
         Python::with_gil(|py| {
             let kw = PyDict::new(py);
@@ -33,6 +35,7 @@ impl YTMusic {
         .map_err(py_err)
     }
 
+    /// Fetch the user's saved artists (requires auth).
     pub fn get_library_artists(&self, limit: Option<u32>, order: Option<&str>) -> Result<Value> {
         Python::with_gil(|py| {
             let kw = PyDict::new(py);
@@ -44,6 +47,7 @@ impl YTMusic {
         .map_err(py_err)
     }
 
+    /// Fetch the user's subscribed artists (requires auth).
     pub fn get_library_subscriptions(&self, limit: Option<u32>, order: Option<&str>) -> Result<Value> {
         Python::with_gil(|py| {
             let kw = PyDict::new(py);
@@ -55,6 +59,7 @@ impl YTMusic {
         .map_err(py_err)
     }
 
+    /// Fetch the user's saved playlists (requires auth).
     pub fn get_library_playlists(&self, limit: Option<u32>) -> Result<Value> {
         Python::with_gil(|py| {
             let kw = PyDict::new(py);
@@ -65,6 +70,7 @@ impl YTMusic {
         .map_err(py_err)
     }
 
+    /// Fetch the user's liked songs playlist (requires auth).
     pub fn get_liked_songs(&self, limit: Option<u32>) -> Result<Value> {
         Python::with_gil(|py| {
             let kw = PyDict::new(py);
@@ -75,6 +81,7 @@ impl YTMusic {
         .map_err(py_err)
     }
 
+    /// Fetch the user's playback history (requires auth).
     pub fn get_history(&self) -> Result<Value> {
         Python::with_gil(|py| {
             let result = self.inner.bind(py).call_method0("get_history")?;
@@ -93,6 +100,7 @@ impl YTMusic {
         .map_err(py_err)
     }
 
+    /// Remove history entries by feedback token (requires auth).
     pub fn remove_history_items(&self, feedback_tokens: &[&str]) -> Result<Value> {
         Python::with_gil(|py| {
             let result = self.inner.bind(py).call_method1("remove_history_items", (feedback_tokens.to_vec(),))?;
@@ -110,6 +118,7 @@ impl YTMusic {
         .map_err(py_err)
     }
 
+    /// Rate a playlist (requires auth). `rating` must be `"LIKE"`, `"DISLIKE"`, or `"INDIFFERENT"`.
     pub fn rate_playlist(&self, playlist_id: &str, rating: &str) -> Result<Value> {
         Python::with_gil(|py| {
             let result = self.inner.bind(py).call_method1("rate_playlist", (playlist_id, rating))?;
@@ -118,6 +127,7 @@ impl YTMusic {
         .map_err(py_err)
     }
 
+    /// Toggle a song's library status via feedback token (requires auth).
     pub fn edit_song_library_status(&self, feedback_tokens: &[&str]) -> Result<Value> {
         Python::with_gil(|py| {
             let result = self.inner.bind(py).call_method1("edit_song_library_status", (feedback_tokens.to_vec(),))?;
@@ -126,6 +136,7 @@ impl YTMusic {
         .map_err(py_err)
     }
 
+    /// Subscribe to artists by channel ID (requires auth).
     pub fn subscribe_artists(&self, channel_ids: &[&str]) -> Result<Value> {
         Python::with_gil(|py| {
             let result = self.inner.bind(py).call_method1("subscribe_artists", (channel_ids.to_vec(),))?;
@@ -134,6 +145,7 @@ impl YTMusic {
         .map_err(py_err)
     }
 
+    /// Unsubscribe from artists by channel ID (requires auth).
     pub fn unsubscribe_artists(&self, channel_ids: &[&str]) -> Result<Value> {
         Python::with_gil(|py| {
             let result = self.inner.bind(py).call_method1("unsubscribe_artists", (channel_ids.to_vec(),))?;

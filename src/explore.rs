@@ -4,6 +4,7 @@ use pyo3::types::PyDict;
 use serde_json::Value;
 
 impl YTMusic {
+    /// Fetch the list of mood and genre categories.
     pub fn get_mood_categories(&self) -> Result<Value> {
         Python::with_gil(|py| {
             let result = self.inner.bind(py).call_method0("get_mood_categories")?;
@@ -12,6 +13,7 @@ impl YTMusic {
         .map_err(py_err)
     }
 
+    /// Fetch playlists for a mood category. `params` comes from the `get_mood_categories()` response.
     pub fn get_mood_playlists(&self, params: &str) -> Result<Value> {
         Python::with_gil(|py| {
             let result = self.inner.bind(py).call_method1("get_mood_playlists", (params,))?;
@@ -31,6 +33,7 @@ impl YTMusic {
         .map_err(py_err)
     }
 
+    /// Fetch the user's taste profile (pass to `set_tasteprofile` to update it).
     pub fn get_tasteprofile(&self) -> Result<Value> {
         Python::with_gil(|py| {
             let result = self.inner.bind(py).call_method0("get_tasteprofile")?;
@@ -57,6 +60,7 @@ impl YTMusic {
         .map_err(py_err)
     }
 
+    /// Fetch the Explore page (new releases, charts, moods).
     pub fn get_explore(&self) -> Result<Value> {
         Python::with_gil(|py| {
             let result = self.inner.bind(py).call_method0("get_explore")?;
@@ -74,6 +78,8 @@ impl YTMusic {
         .map_err(py_err)
     }
 
+    /// Fetch the auto-play queue for a track or playlist.
+    /// At least one of `video_id` or `playlist_id` must be provided.
     pub fn get_watch_playlist(
         &self,
         video_id: Option<&str>,
