@@ -204,8 +204,9 @@ pub(crate) fn py_err(e: PyErr) -> YtMusicError {
     YtMusicError::Python(format!("{e}"))
 }
 
-/// Acquire the GIL and run `f`. With the `auto-initialize` feature enabled this
-/// always succeeds; the `expect` is a safety net that should never trigger.
+/// Acquire the GIL and run `f`. `Python::attach` respects the `auto-initialize`
+/// feature and starts the interpreter if it hasn't been started yet.
+/// (`Python::try_attach` does not — it skips auto-init and would silently fail.)
 pub(crate) fn with_gil<F, R>(f: F) -> R
 where
     F: for<'py> FnOnce(Python<'py>) -> R,
