@@ -1,4 +1,4 @@
-use crate::{json_to_py, py_err, py_to_json, Result, YTMusic};
+use crate::{json_to_py, py_err, py_to_json, with_gil, Result, YTMusic};
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
 use serde_json::Value;
@@ -15,7 +15,7 @@ impl YTMusic {
         limit: Option<u32>,
         ignore_spelling: Option<bool>,
     ) -> Result<Value> {
-        Python::with_gil(|py| {
+        with_gil(|py| {
             let inner = self.inner.bind(py);
             let kw = PyDict::new(py);
             kw.set_item("query", query)?;
@@ -35,7 +35,7 @@ impl YTMusic {
         query: &str,
         detailed_runs: Option<bool>,
     ) -> Result<Value> {
-        Python::with_gil(|py| {
+        with_gil(|py| {
             let inner = self.inner.bind(py);
             let kw = PyDict::new(py);
             kw.set_item("query", query)?;
@@ -54,7 +54,7 @@ impl YTMusic {
         suggestions: &Value,
         indices: Option<&[u32]>,
     ) -> Result<Value> {
-        Python::with_gil(|py| {
+        with_gil(|py| {
             let py_suggestions = json_to_py(py, suggestions)?;
             let kw = PyDict::new(py);
             kw.set_item("suggestions", py_suggestions)?;

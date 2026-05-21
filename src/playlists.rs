@@ -1,4 +1,4 @@
-use crate::{py_err, py_to_json, Result, YTMusic};
+use crate::{py_err, py_to_json, with_gil, Result, YTMusic};
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
 use serde_json::Value;
@@ -13,7 +13,7 @@ impl YTMusic {
         related: Option<bool>,
         suggestions_limit: Option<u32>,
     ) -> Result<Value> {
-        Python::with_gil(|py| {
+        with_gil(|py| {
             let kw = PyDict::new(py);
             kw.set_item("playlistId", playlist_id)?;
             if let Some(v) = limit { kw.set_item("limit", v)?; }
@@ -34,7 +34,7 @@ impl YTMusic {
         video_ids: Option<&[&str]>,
         source_playlist: Option<&str>,
     ) -> Result<Value> {
-        Python::with_gil(|py| {
+        with_gil(|py| {
             let kw = PyDict::new(py);
             kw.set_item("title", title)?;
             kw.set_item("description", description)?;
@@ -62,7 +62,7 @@ impl YTMusic {
         add_to_top: Option<bool>,
         vote_option: Option<&str>,
     ) -> Result<Value> {
-        Python::with_gil(|py| {
+        with_gil(|py| {
             let kw = PyDict::new(py);
             kw.set_item("playlistId", playlist_id)?;
             if let Some(v) = title { kw.set_item("title", v)?; }
@@ -84,7 +84,7 @@ impl YTMusic {
 
     /// Delete a playlist by its ID (requires auth).
     pub fn delete_playlist(&self, playlist_id: &str) -> Result<Value> {
-        Python::with_gil(|py| {
+        with_gil(|py| {
             let result = self.inner.bind(py).call_method1("delete_playlist", (playlist_id,))?;
             py_to_json(py, &result)
         })
@@ -99,7 +99,7 @@ impl YTMusic {
         source_playlist: Option<&str>,
         duplicates: Option<bool>,
     ) -> Result<Value> {
-        Python::with_gil(|py| {
+        with_gil(|py| {
             let kw = PyDict::new(py);
             kw.set_item("playlistId", playlist_id)?;
             if let Some(v) = video_ids { kw.set_item("videoIds", v.to_vec())?; }
@@ -113,7 +113,7 @@ impl YTMusic {
 
     /// `videos` is a list of track objects (as returned by `get_playlist`).
     pub fn remove_playlist_items(&self, playlist_id: &str, videos: &Value) -> Result<Value> {
-        Python::with_gil(|py| {
+        with_gil(|py| {
             let py_videos = crate::json_to_py(py, videos)?;
             let result = self.inner.bind(py).call_method1("remove_playlist_items", (playlist_id, py_videos))?;
             py_to_json(py, &result)
@@ -128,7 +128,7 @@ impl YTMusic {
         playlist_id: &str,
         join_collaboration_token: &str,
     ) -> Result<Value> {
-        Python::with_gil(|py| {
+        with_gil(|py| {
             let result = self.inner.bind(py).call_method1(
                 "join_collaborative_playlist",
                 (playlist_id, join_collaboration_token),

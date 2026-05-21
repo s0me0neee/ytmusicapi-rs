@@ -1,4 +1,4 @@
-use crate::{py_err, py_to_json, Result, YTMusic};
+use crate::{py_err, py_to_json, with_gil, Result, YTMusic};
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
 use serde_json::Value;
@@ -6,7 +6,7 @@ use serde_json::Value;
 impl YTMusic {
     /// Fetch the home feed. `limit` caps the number of sections returned.
     pub fn get_home(&self, limit: Option<u32>) -> Result<Value> {
-        Python::with_gil(|py| {
+        with_gil(|py| {
             let inner = self.inner.bind(py);
             let kw = PyDict::new(py);
             if let Some(v) = limit { kw.set_item("limit", v)?; }
@@ -18,7 +18,7 @@ impl YTMusic {
 
     /// Fetch an artist page by channel ID.
     pub fn get_artist(&self, channel_id: &str) -> Result<Value> {
-        Python::with_gil(|py| {
+        with_gil(|py| {
             let result = self.inner.bind(py).call_method1("get_artist", (channel_id,))?;
             py_to_json(py, &result)
         })
@@ -34,7 +34,7 @@ impl YTMusic {
         limit: Option<u32>,
         order: Option<&str>,
     ) -> Result<Value> {
-        Python::with_gil(|py| {
+        with_gil(|py| {
             let kw = PyDict::new(py);
             kw.set_item("channelId", channel_id)?;
             kw.set_item("params", params)?;
@@ -48,7 +48,7 @@ impl YTMusic {
 
     /// Fetch an album by its browse ID.
     pub fn get_album(&self, browse_id: &str) -> Result<Value> {
-        Python::with_gil(|py| {
+        with_gil(|py| {
             let result = self.inner.bind(py).call_method1("get_album", (browse_id,))?;
             py_to_json(py, &result)
         })
@@ -57,7 +57,7 @@ impl YTMusic {
 
     /// Convert an `audioPlaylistId` (starts with `OLAK5uy_`) to a `browseId`.
     pub fn get_album_browse_id(&self, audio_playlist_id: &str) -> Result<Value> {
-        Python::with_gil(|py| {
+        with_gil(|py| {
             let result = self.inner.bind(py).call_method1("get_album_browse_id", (audio_playlist_id,))?;
             py_to_json(py, &result)
         })
@@ -66,7 +66,7 @@ impl YTMusic {
 
     /// Fetch song metadata. `signature_timestamp` is needed for streaming URL decryption.
     pub fn get_song(&self, video_id: &str, signature_timestamp: Option<u64>) -> Result<Value> {
-        Python::with_gil(|py| {
+        with_gil(|py| {
             let inner = self.inner.bind(py);
             let kw = PyDict::new(py);
             kw.set_item("videoId", video_id)?;
@@ -79,7 +79,7 @@ impl YTMusic {
 
     /// Fetch content related to a song. `browse_id` comes from the `get_song()` response.
     pub fn get_song_related(&self, browse_id: &str) -> Result<Value> {
-        Python::with_gil(|py| {
+        with_gil(|py| {
             let result = self.inner.bind(py).call_method1("get_song_related", (browse_id,))?;
             py_to_json(py, &result)
         })
@@ -89,7 +89,7 @@ impl YTMusic {
     /// `browse_id` is returned by `get_song()` under `lyrics.browseId`.
     /// Set `timestamps` to include word-level timing data.
     pub fn get_lyrics(&self, browse_id: &str, timestamps: Option<bool>) -> Result<Value> {
-        Python::with_gil(|py| {
+        with_gil(|py| {
             let kw = PyDict::new(py);
             kw.set_item("browseId", browse_id)?;
             if let Some(v) = timestamps { kw.set_item("timestamps", v)?; }
@@ -101,7 +101,7 @@ impl YTMusic {
 
     /// Fetch a user's public profile by channel ID.
     pub fn get_user(&self, channel_id: &str) -> Result<Value> {
-        Python::with_gil(|py| {
+        with_gil(|py| {
             let result = self.inner.bind(py).call_method1("get_user", (channel_id,))?;
             py_to_json(py, &result)
         })
@@ -110,7 +110,7 @@ impl YTMusic {
 
     /// Fetch a user's public playlists. `params` comes from the `get_user()` response.
     pub fn get_user_playlists(&self, channel_id: &str, params: &str) -> Result<Value> {
-        Python::with_gil(|py| {
+        with_gil(|py| {
             let result = self.inner.bind(py).call_method1("get_user_playlists", (channel_id, params))?;
             py_to_json(py, &result)
         })
@@ -119,7 +119,7 @@ impl YTMusic {
 
     /// Fetch a user's uploaded videos. `params` comes from the `get_user()` response.
     pub fn get_user_videos(&self, channel_id: &str, params: &str) -> Result<Value> {
-        Python::with_gil(|py| {
+        with_gil(|py| {
             let result = self.inner.bind(py).call_method1("get_user_videos", (channel_id, params))?;
             py_to_json(py, &result)
         })
@@ -128,7 +128,7 @@ impl YTMusic {
 
     /// Fetch credits (writers, producers, etc.) for a song. `browse_id` comes from `get_song()`.
     pub fn get_song_credits(&self, browse_id: &str) -> Result<Value> {
-        Python::with_gil(|py| {
+        with_gil(|py| {
             let result = self.inner.bind(py).call_method1("get_song_credits", (browse_id,))?;
             py_to_json(py, &result)
         })

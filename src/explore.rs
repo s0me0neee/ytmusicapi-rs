@@ -1,4 +1,4 @@
-use crate::{json_to_py, py_err, py_to_json, Result, YTMusic};
+use crate::{json_to_py, py_err, py_to_json, with_gil, Result, YTMusic};
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
 use serde_json::Value;
@@ -6,7 +6,7 @@ use serde_json::Value;
 impl YTMusic {
     /// Fetch the list of mood and genre categories.
     pub fn get_mood_categories(&self) -> Result<Value> {
-        Python::with_gil(|py| {
+        with_gil(|py| {
             let result = self.inner.bind(py).call_method0("get_mood_categories")?;
             py_to_json(py, &result)
         })
@@ -15,7 +15,7 @@ impl YTMusic {
 
     /// Fetch playlists for a mood category. `params` comes from the `get_mood_categories()` response.
     pub fn get_mood_playlists(&self, params: &str) -> Result<Value> {
-        Python::with_gil(|py| {
+        with_gil(|py| {
             let result = self.inner.bind(py).call_method1("get_mood_playlists", (params,))?;
             py_to_json(py, &result)
         })
@@ -24,7 +24,7 @@ impl YTMusic {
 
     /// `country` is a 2-letter ISO country code, or `"ZZ"` for global charts.
     pub fn get_charts(&self, country: Option<&str>) -> Result<Value> {
-        Python::with_gil(|py| {
+        with_gil(|py| {
             let kw = PyDict::new(py);
             if let Some(v) = country { kw.set_item("country", v)?; }
             let result = self.inner.bind(py).call_method("get_charts", (), Some(&kw))?;
@@ -35,7 +35,7 @@ impl YTMusic {
 
     /// Fetch the user's taste profile (pass to `set_tasteprofile` to update it).
     pub fn get_tasteprofile(&self) -> Result<Value> {
-        Python::with_gil(|py| {
+        with_gil(|py| {
             let result = self.inner.bind(py).call_method0("get_tasteprofile")?;
             py_to_json(py, &result)
         })
@@ -48,7 +48,7 @@ impl YTMusic {
         artists: &[&str],
         taste_profile: Option<&Value>,
     ) -> Result<Value> {
-        Python::with_gil(|py| {
+        with_gil(|py| {
             let kw = PyDict::new(py);
             kw.set_item("artists", artists.to_vec())?;
             if let Some(v) = taste_profile {
@@ -62,7 +62,7 @@ impl YTMusic {
 
     /// Fetch the Explore page (new releases, charts, moods).
     pub fn get_explore(&self) -> Result<Value> {
-        Python::with_gil(|py| {
+        with_gil(|py| {
             let result = self.inner.bind(py).call_method0("get_explore")?;
             py_to_json(py, &result)
         })
@@ -71,7 +71,7 @@ impl YTMusic {
 
     /// Returns info about the currently authenticated account (name, channel ID, etc.).
     pub fn get_account_info(&self) -> Result<Value> {
-        Python::with_gil(|py| {
+        with_gil(|py| {
             let result = self.inner.bind(py).call_method0("get_account_info")?;
             py_to_json(py, &result)
         })
@@ -88,7 +88,7 @@ impl YTMusic {
         radio: Option<bool>,
         shuffle: Option<bool>,
     ) -> Result<Value> {
-        Python::with_gil(|py| {
+        with_gil(|py| {
             let kw = PyDict::new(py);
             if let Some(v) = video_id { kw.set_item("videoId", v)?; }
             if let Some(v) = playlist_id { kw.set_item("playlistId", v)?; }

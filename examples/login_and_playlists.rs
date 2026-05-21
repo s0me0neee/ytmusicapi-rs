@@ -3,7 +3,7 @@
 // IDs). The working method is browser auth: copy request headers from DevTools.
 
 use std::path::Path;
-use ytmusicapi::YTMusic;
+use ytmusicapi_rs::YTMusic;
 
 const BROWSER_FILE: &str = "browser.json";
 

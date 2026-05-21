@@ -1,14 +1,15 @@
 [package]
-name = "ytmusicapi"
+name = "ytmusicapi_rs"
 version = "0.1.0"
 edition = "2024"
 description = "Rust bindings for the ytmusicapi Python library"
 license = "MIT"
+repository = "https://github.com/s0me0neee/ytmusicapi-rs.git"
 
 [lib]
-name = "ytmusicapi"
+name = "ytmusicapi_rs"
 
 [dependencies]
-pyo3 = { version = "0.23", features = ["auto-initialize"] }
+pyo3 = { version = "0.28", features = ["auto-initialize"] }
 serde_json = "1"
 thiserror = "2"

@@ -48,7 +48,7 @@ static PYTHON_SETUP: std::sync::OnceLock<()> = std::sync::OnceLock::new();
 
 fn ensure_venv() {
     PYTHON_SETUP.get_or_init(|| {
-        let _ = Python::with_gil(|py| -> PyResult<()> {
+        let _ = with_gil(|py| -> PyResult<()> {
             let sys = PyModule::import(py, "sys")?;
             let path = sys.getattr("path")?;
             let already: bool = path
@@ -90,7 +90,7 @@ impl YTMusic {
     /// Full constructor — `auth` is optional, `language` defaults to `"en"`.
     pub fn with_options(auth: Option<&str>, language: &str, location: &str) -> Result<Self> {
         ensure_venv();
-        Python::with_gil(|py| {
+        with_gil(|py| {
             let module = PyModule::import(py, "ytmusicapi")?;
             let cls = module.getattr("YTMusic")?;
             let kw = PyDict::new(py);
@@ -113,7 +113,7 @@ impl YTMusic {
     /// Returns the path written, or a JSON token string.
     pub fn setup(filepath: Option<&str>) -> Result<String> {
         ensure_venv();
-        Python::with_gil(|py| {
+        with_gil(|py| {
             let module = PyModule::import(py, "ytmusicapi")?;
             let kw = PyDict::new(py);
             if let Some(p) = filepath {
@@ -138,7 +138,7 @@ impl YTMusic {
         open_browser: bool,
     ) -> Result<()> {
         ensure_venv();
-        Python::with_gil(|py| {
+        with_gil(|py| {
             patch_refreshing_token(py)?;
             let module = PyModule::import(py, "ytmusicapi")?;
             let kw = PyDict::new(py);
@@ -159,7 +159,7 @@ impl YTMusic {
     /// library can silently refresh the access token when it expires.
     pub fn with_oauth(oauth_file: &str, client_id: &str, client_secret: &str) -> Result<Self> {
         ensure_venv();
-        Python::with_gil(|py| {
+        with_gil(|py| {
             let module = PyModule::import(py, "ytmusicapi")?;
             let cls = module.getattr("YTMusic")?;
             let creds_cls = module.getattr("OAuthCredentials")?;
@@ -202,6 +202,15 @@ pub(crate) fn json_to_py<'py>(
 /// Map a `PyErr` to `YtMusicError`.
 pub(crate) fn py_err(e: PyErr) -> YtMusicError {
     YtMusicError::Python(format!("{e}"))
+}
+
+/// Acquire the GIL and run `f`. With the `auto-initialize` feature enabled this
+/// always succeeds; the `expect` is a safety net that should never trigger.
+pub(crate) fn with_gil<F, R>(f: F) -> R
+where
+    F: for<'py> FnOnce(Python<'py>) -> R,
+{
+    Python::try_attach(f).expect("Python interpreter is not initialized")
 }
 
 /// Patch `RefreshingToken.__init__` to silently drop any keyword arguments that
